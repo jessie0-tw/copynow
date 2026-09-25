@@ -100,6 +100,9 @@ const els = {
   mobileTabs:       $('mobile-tabs'),
   mobBtnAddCat:     $('mob-btn-add-category'),
 
+  // FAB
+  fabAdd:           $('fab-add'),
+
   // Content
   contentTitle:   $('content-title'),
   snippetsGrid:   $('snippets-grid'),
@@ -220,28 +223,52 @@ function renderSidebar() {
   });
 
   // ── Mobile tab bar ──
-  // Keep the first two static tabs (全部, 最近使用), remove old category tabs
-  const existingCatTabs = els.mobileTabs.querySelectorAll('.mobile-tab.cat-tab');
+  const existingCatTabs = els.mobileTabs.querySelectorAll('.mobile-tab.cat-tab, .mob-add-cat-tab');
   existingCatTabs.forEach(t => t.remove());
 
   // Update active state on static tabs
   els.mobileTabs.querySelector('[data-filter="all"]').classList.toggle('active', currentFilter === 'all');
   els.mobileTabs.querySelector('[data-filter="recent"]').classList.toggle('active', currentFilter === 'recent');
 
-  // Add a mobile tab for each category
+  // Add a mobile tab for each category (with × delete button)
   state.categories.forEach(cat => {
     const isActive = currentFilter === cat;
     const tabBtn = document.createElement('button');
     tabBtn.className = 'mobile-tab cat-tab' + (isActive ? ' active' : '');
     tabBtn.dataset.filter = cat;
-    tabBtn.role = 'tab';
+    tabBtn.setAttribute('role', 'tab');
     tabBtn.setAttribute('aria-selected', String(isActive));
-    tabBtn.textContent = cat;
+
+    // Label text
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = cat;
+
+    // × delete button
+    const delSpan = document.createElement('span');
+    delSpan.className = 'mob-cat-del';
+    delSpan.setAttribute('role', 'button');
+    delSpan.setAttribute('aria-label', `刪除分類 ${cat}`);
+    delSpan.textContent = '×';
+    delSpan.addEventListener('click', e => {
+      e.stopPropagation(); // don’t trigger filter change
+      deleteCategory(cat);
+    });
+
+    tabBtn.appendChild(labelSpan);
+    tabBtn.appendChild(delSpan);
     tabBtn.addEventListener('click', () => setFilter(cat));
     els.mobileTabs.appendChild(tabBtn);
   });
 
-  // Scroll active tab into view (smooth)
+  // Inline 新增分類 button (at end of tab list)
+  const addCatTab = document.createElement('button');
+  addCatTab.className = 'mob-add-cat-tab';
+  addCatTab.setAttribute('aria-label', '新增分類');
+  addCatTab.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> 新增分類`;
+  addCatTab.addEventListener('click', openCategoryModal);
+  els.mobileTabs.appendChild(addCatTab);
+
+  // Scroll active tab into view
   const activeTab = els.mobileTabs.querySelector('.mobile-tab.active');
   if (activeTab) activeTab.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
 }
@@ -567,7 +594,11 @@ els.btnAddCategory.addEventListener('click', openCategoryModal);
 // Mobile tab bar — static tabs
 els.mobileTabs.querySelector('[data-filter="all"]').addEventListener('click',    () => setFilter('all'));
 els.mobileTabs.querySelector('[data-filter="recent"]').addEventListener('click', () => setFilter('recent'));
-els.mobBtnAddCat.addEventListener('click', openCategoryModal);
+// Note: mob-btn-add-category is kept as fallback (hidden by CSS if not needed)
+if (els.mobBtnAddCat) els.mobBtnAddCat.addEventListener('click', openCategoryModal);
+
+// FAB
+els.fabAdd.addEventListener('click', openAddModal);
 
 // View toggles
 els.viewGrid.addEventListener('click', () => {
