@@ -13,10 +13,11 @@
   --clr-border:       #dde4f0;
   --clr-border-sub:   #e8edf7;
 
-  --clr-primary:      #5c4ee8;
-  --clr-primary-light:#ede9ff;
-  --clr-primary-mid:  #bdb4f9;
-  --clr-primary-dark: #4338ca;
+  /* ── Unified orange brand ── */
+  --clr-primary:      #ff6d3f;
+  --clr-primary-light:#fff0eb;
+  --clr-primary-mid:  #ffb89e;
+  --clr-primary-dark: #e85520;
   --clr-fab:          #ff6d3f;
   --clr-fab-dark:     #e85520;
   --clr-tab-active:   #ff6d3f;
@@ -37,10 +38,10 @@
   --radius-xl:  22px;
   --radius-pill:99px;
 
-  --shadow-xs:  0 1px 4px rgba(80,70,200,.07);
-  --shadow-sm:  0 2px 10px rgba(80,70,200,.09);
-  --shadow-md:  0 6px 24px rgba(80,70,200,.13);
-  --shadow-lg:  0 16px 48px rgba(80,70,200,.18);
+  --shadow-xs:  0 1px 4px rgba(255,109,63,.07);
+  --shadow-sm:  0 2px 10px rgba(255,109,63,.09);
+  --shadow-md:  0 6px 24px rgba(255,109,63,.13);
+  --shadow-lg:  0 16px 48px rgba(0,0,0,.12);
 
   --sidebar-w:   220px;
   --header-h:    58px;
@@ -465,7 +466,7 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .snippets-grid.list-view {
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 5px;  /* tighter rows in list view */
 }
 
 
@@ -540,21 +541,31 @@ input, textarea, select { font: inherit; color: inherit; }
   padding: 5px 13px; border-radius: var(--radius-pill);
   font-size: .8rem; font-weight: 500;
   background: linear-gradient(135deg, var(--clr-primary) 0%, var(--clr-primary-dark) 100%);
-  color: #fff; box-shadow: 0 2px 8px rgba(92,78,232,.22);
+  color: #fff; box-shadow: 0 2px 8px rgba(255,109,63,.25);
   transition: box-shadow .2s, filter .2s, transform .15s; flex-shrink: 0;
 }
-.card-copy-btn:hover { box-shadow: 0 3px 14px rgba(92,78,232,.38); filter: brightness(1.06); }
+.card-copy-btn:hover { box-shadow: 0 3px 14px rgba(255,109,63,.42); filter: brightness(1.06); }
 .card-copy-btn:active { transform: scale(.95); }
 .card-copy-btn.copied {
   background: linear-gradient(135deg, var(--clr-success) 0%, #16a34a 100%);
   box-shadow: 0 2px 8px rgba(34,197,94,.25);
 }
 
-/* List view tweaks */
-.list-view .snippet-card { flex-direction: row; align-items: center; padding: 12px 16px; gap: 12px; }
-.list-view .card-header  { flex: 0 0 150px; }
-.list-view .card-body    { flex: 1; -webkit-line-clamp: 2; }
-.list-view .card-footer  { flex: 0 0 auto; margin-top: 0; flex-wrap: nowrap; }
+/* ── List view — compact, no content preview ── */
+.list-view .snippet-card {
+  flex-direction: row;
+  align-items: center;
+  padding: 9px 14px;
+  gap: 10px;
+  min-height: unset;
+  border-radius: var(--radius-md);
+}
+.list-view .card-body   { display: none; }  /* hide content — shorter rows */
+.list-view .card-header { flex: 1; min-width: 0; }
+.list-view .card-title  { font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-line-clamp: 1; }
+.list-view .card-footer { flex: 0 0 auto; margin-top: 0; flex-wrap: nowrap; gap: 6px; }
+.list-view .card-actions { opacity: 1; }
+.list-view .card-copy-btn { padding: 5px 12px; font-size: .78rem; }
 
 
 /* ─── Empty state ─── */
@@ -737,12 +748,13 @@ input, textarea, select { font: inherit; color: inherit; }
   /* FAB clears content above it */
   .content { padding-bottom: 90px; }
 
-  /* List view on mobile: simpler */
-  .list-view .snippet-card { flex-direction: column; }
-  .list-view .card-header  { flex: none; width: 100%; }
-  .list-view .card-body    { width: 100%; }
-  .list-view .card-footer  { flex-wrap: wrap; flex-direction: row; }
-  .list-view .card-copy-btn { width: auto; }
+  /* List view on mobile — one-line compact rows */
+  .list-view .snippet-card { flex-direction: row; padding: 9px 12px; min-height: unset; gap: 8px; }
+  .list-view .card-header  { flex: 1; min-width: 0; }
+  .list-view .card-title   { font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-view .card-body    { display: none; }  /* keep hidden on mobile too */
+  .list-view .card-footer  { flex: 0 0 auto; flex-direction: row; flex-wrap: nowrap; margin-top: 0; }
+  .list-view .card-copy-btn { width: auto; padding: 5px 10px; font-size: .76rem; }
 }
 
 @media (max-width: 400px) {
