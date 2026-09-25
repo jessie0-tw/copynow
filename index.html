@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CopyNow — 快速複製工具</title>
+  <meta name="description" content="CopyNow 是一款快速複製常用文字片段的工具，支援分類管理與一鍵複製。" />
+  <!-- PWA / Mobile -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="CopyNow" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ─── Header ─── -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">⚡</span>
+        <h1 class="brand-name">CopyNow</h1>
+      </div>
+      <div class="header-actions">
+        <div class="search-bar-wrap">
+          <span class="search-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </span>
+          <input
+            id="search-input"
+            type="search"
+            class="search-input"
+            placeholder="搜尋片段..."
+            aria-label="搜尋片段"
+            autocomplete="off"
+          />
+        </div>
+        <button id="btn-add-snippet" class="btn btn-primary" aria-label="新增片段">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          新增片段
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Mobile category tab bar (shown only on small screens) ─── -->
+  <div class="mobile-tabs-wrap" id="mobile-tabs-wrap" aria-label="分類篩選">
+    <div class="mobile-tabs" id="mobile-tabs" role="tablist">
+      <button class="mobile-tab active" data-filter="all" role="tab" aria-selected="true" id="mob-tab-all">全部</button>
+      <button class="mobile-tab" data-filter="recent" role="tab" aria-selected="false" id="mob-tab-recent">最近使用</button>
+      <!-- dynamic category tabs appended by JS -->
+    </div>
+    <button id="mob-btn-add-category" class="mob-add-cat-btn" aria-label="新增分類" title="新增分類">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+
+  <!-- ─── Main Layout ─── -->
+  <div class="app-body">
+
+    <!-- Sidebar (desktop only) -->
+    <aside class="sidebar" id="sidebar" aria-label="分類導航">
+      <div class="sidebar-section">
+        <p class="sidebar-label">檢視</p>
+        <ul class="sidebar-nav" role="list">
+          <li>
+            <button class="sidebar-item active" data-filter="all" id="filter-all">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+              全部
+              <span class="badge" id="badge-all">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-item" data-filter="recent" id="filter-recent">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              最近使用
+              <span class="badge" id="badge-recent">0</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label-row">
+          <p class="sidebar-label">分類</p>
+          <button id="btn-add-category" class="btn-icon" title="新增分類" aria-label="新增分類">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <ul class="sidebar-nav categories-nav" id="categories-nav" role="list">
+          <!-- dynamic categories -->
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="content" id="main-content" aria-label="片段列表">
+      <div class="content-header">
+        <h2 class="content-title" id="content-title">全部片段</h2>
+        <div class="view-controls">
+          <button class="view-btn active" id="view-grid" aria-label="格狀檢視" title="格狀">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </button>
+          <button class="view-btn" id="view-list" aria-label="列表檢視" title="列表">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="snippets-grid" id="snippets-grid" role="list">
+        <!-- dynamic snippets -->
+      </div>
+
+      <div class="empty-state" id="empty-state" style="display:none">
+        <div class="empty-icon">📋</div>
+        <p class="empty-title">還沒有片段</p>
+        <p class="empty-sub">點擊「新增片段」來建立你的第一個常用文字片段</p>
+        <button class="btn btn-primary" id="btn-add-first">新增第一個片段</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ─── Toast notification ─── -->
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ─── Snippet Modal (Add / Edit) ─── -->
+  <dialog id="snippet-modal" class="modal" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title" class="modal-title">新增片段</h2>
+        <button class="modal-close" id="modal-close" aria-label="關閉">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="snippet-form" method="dialog" novalidate>
+        <div class="form-group">
+          <label for="field-title" class="form-label">標題 <span class="required">*</span></label>
+          <input id="field-title" type="text" class="form-input" placeholder="例：公司地址" required maxlength="80" autocomplete="off" />
+          <span class="field-error" id="err-title"></span>
+        </div>
+        <div class="form-group">
+          <label for="field-content" class="form-label">內容 <span class="required">*</span></label>
+          <textarea id="field-content" class="form-textarea" placeholder="輸入要複製的文字內容..." required rows="5" maxlength="5000"></textarea>
+          <div class="field-footer">
+            <span class="field-error" id="err-content"></span>
+            <span class="char-count" id="char-count">0 / 5000</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-category" class="form-label">分類</label>
+          <div class="input-combo">
+            <select id="field-category" class="form-select">
+              <option value="">— 無分類 —</option>
+            </select>
+            <span class="combo-sep">或</span>
+            <input id="field-new-category" type="text" class="form-input" placeholder="輸入新分類名稱" maxlength="30" autocomplete="off" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="modal-cancel">取消</button>
+          <button type="submit" class="btn btn-primary" id="modal-save">儲存</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ─── Confirm Delete Dialog ─── -->
+  <dialog id="confirm-modal" class="modal modal-sm" aria-labelledby="confirm-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="confirm-title" class="modal-title">確認刪除</h2>
+      </div>
+      <p class="confirm-text">確定要刪除這個片段嗎？此操作無法復原。</p>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="confirm-cancel">取消</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok">刪除</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ─── Add Category Dialog ─── -->
+  <dialog id="category-modal" class="modal modal-sm" aria-labelledby="cat-modal-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="cat-modal-title" class="modal-title">新增分類</h2>
+        <button class="modal-close" id="cat-modal-close" aria-label="關閉">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="form-group">
+        <label for="new-cat-name" class="form-label">分類名稱</label>
+        <input id="new-cat-name" type="text" class="form-input" placeholder="例：工作常用、個人資訊..." maxlength="30" autocomplete="off" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="cat-modal-cancel">取消</button>
+        <button type="button" class="btn btn-primary" id="cat-modal-save">新增</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
